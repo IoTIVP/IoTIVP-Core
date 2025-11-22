@@ -2,6 +2,13 @@
 ### *Human-Readable Integrity Verification Protocol for IoT, Robotics & Low-Power Systems*  
 **By PD2KC.ai — IoTIVP Protocol Team**
 
+![Version](https://img.shields.io/badge/IoTIVP--Core-v1.5.0-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Draft-orange?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Spec Type](https://img.shields.io/badge/Spec-Human%20Readable-lightgrey?style=for-the-badge)
+![Maintainer](https://img.shields.io/badge/PD2KC.ai-IoTIVP%20Protocol%20Team-purple?style=for-the-badge)
+
+
 IoTIVP-Core v1.5 is the **human-readable, structured, explainable layer** of the IoTIVP ecosystem.  
 It defines a clear, flexible, machine-verifiable data format for IoT, robotics, sensors, LoRa, BLE, mesh devices, and low-power embedded systems.
 
