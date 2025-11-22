@@ -1,1 +1,13 @@
-
+{
+  "version": "1.5",
+  "device_id": "ENV-1022",
+  "timestamp": 1737601122,
+  "readings": {
+    "temp": 23.4,
+    "hum": 57.8,
+    "pressure": 1011.2,
+    "batt": 3.82
+  },
+  "nonce": 44,
+  "hash": "9f21ab337bc4e81d"
+}
