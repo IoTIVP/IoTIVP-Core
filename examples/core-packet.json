@@ -1,0 +1,12 @@
+{
+  "version": "1.5",
+  "device_id": "DEV-A19F",
+  "timestamp": 1737591022,
+  "readings": {
+    "temp": 22.4,
+    "hum": 54.8,
+    "batt": 3.74
+  },
+  "nonce": 117,
+  "hash": "6ac4fa2e45f1478f"
+}
