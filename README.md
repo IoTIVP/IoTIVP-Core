@@ -1,239 +1,288 @@
-# **IoTIVP-Core v1.5**  
-### *Human-Readable Integrity Verification Protocol for IoT, Robotics & Low-Power Systems*  
-**By PD2KC.ai — IoTIVP Protocol Team**
+# IoTIVP-Core v1.5  
+**Internet of Things Integrity Verification Protocol — Core Layer**
 
-![Version](https://img.shields.io/badge/IoTIVP--Core-v1.5.0-blue?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Draft-orange?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Spec Type](https://img.shields.io/badge/Spec-Human%20Readable-lightgrey?style=for-the-badge)
-![Maintainer](https://img.shields.io/badge/PD2KC.ai-IoTIVP%20Protocol%20Team-purple?style=for-the-badge)
+IoTIVP-Core defines the **structured, human-readable JSON representation** of IoT telemetry before it is compressed into IoTIVP-Binary v1.0 or after Binary packets are decoded by a gateway.
 
+IoTIVP-Core is used by:
 
-IoTIVP-Core v1.5 is the **human-readable, structured, explainable layer** of the IoTIVP ecosystem.  
-It defines a clear, flexible, machine-verifiable data format for IoT, robotics, sensors, LoRa, BLE, mesh devices, and low-power embedded systems.
+- Gateways  
+- Servers  
+- n8n workflows  
+- Analytics dashboards  
+- Robotics & simulation systems  
 
-This layer focuses on:
-- **Transparency**
-- **Field-level hashing**
-- **Normalization**
-- **Replay protection**
-- **Lightweight device fingerprinting**
-- **Gateway-friendly validation**
-
-IoTIVP-Core sits **above** IoTIVP-Binary v1.0.  
-Together, they form a complete integrity verification protocol stack.
+It is the **logic + integrity engine** of the IoTIVP ecosystem.
 
 ---
 
-# 🔹 **Core Mission**
-IoTIVP-Core provides a framework for:
-- Validating sensor data  
-- Detecting tampering  
-- Ensuring source authenticity  
-- Normalizing unpredictable IoT payloads  
-- Preparing clean data before encoding into Binary v1.0
+# 1. Role of IoTIVP-Core
 
-Think of IoTIVP-Core as the **blueprint** and IoTIVP-Binary as the **ammunition**.
-
----
-
-# 🔹 **1. Structure Overview**
-
-IoTIVP-Core packets are human-readable and follow a predictable, standard format.
+IoTIVP-Core sits directly above IoTIVP-Binary and directly below IoTIVP Verify Engine:
 
 ```
++--------------------------------------------------------+
+|                 IoTIVP Ecosystem Layers                |
++--------------------------------------------------------+
+|  Dashboards / Analytics / Robotics Control Systems     |
+|  IoTIVP Verify Engine (Integrity Score v2.0)           |
+|  IoTIVP-Core (Structured JSON Protocol v1.5)           |
+|  IoTIVP-Binary v1.0 (Binary Wire Packet Format)        |
+|  Device Firmware (Sensors, ESP32, LoRa, BLE, Robots)   |
++--------------------------------------------------------+
+```
+
+**Purpose:**  
+IoTIVP-Core describes fields, timestamp rules, hashing rules, and required metadata *before encoding* (or after decoding from Binary).
+
+---
+
+# 2. IoTIVP-Core JSON Structure
+
+A valid IoTIVP-Core packet looks like:
+
+```json
 {
-  "version": "1.5",
-  "device_id": "...",
-  "timestamp": "...",
-  "readings": {
-      "temp": 23.1,
-      "hum": 55.4
+  "header": 1,
+  "timestamp": 1732212000,
+  "device_id": 42,
+  "nonce": 56,
+  "fields": {
+    "temperature": 23.5,
+    "humidity": 60,
+    "battery": 92
   },
-  "nonce": 91,
-  "hash": "..."
+  "hash": "a9f23d91"
 }
 ```
 
-Core fields:
-
-| Field | Required | Purpose |
-|-------|----------|----------|
-| **version** | Yes | Protocol version (e.g., 1.5) |
-| **device_id** | Yes | Unique per-device identifier |
-| **timestamp** | Yes | UNIX epoch or device-timer |
-| **readings** | Yes | Sensor/telemetry values |
-| **nonce** | Optional | Replay prevention |
-| **hash** | Yes | Field-level integrity verification |
+### Required Fields
+| Key | Description |
+|-----|-------------|
+| **header** | version/flags for IoTIVP-Core |
+| **timestamp** | seconds or ms since epoch |
+| **device_id** | unique device identifier |
+| **fields** | dictionary of actual sensor readings |
+| **hash** | truncated digest over fields |
+| **nonce** | optional replay-protection value |
 
 ---
 
-# 🔹 **2. Hashing (Field-Level Integrity)**
+# 3. Integrity Hash Pipeline (Core → v1.5)
 
-IoTIVP-Core hashes individual fields — not just the entire packet.
-
-Default algorithm: **BLAKE2s-256 → truncated**  
-Allowed algorithms:
-- BLAKE2s  
-- SHA-256  
-- xxHash (low-risk scenarios)
-
-Hash covers:
+IoTIVP-Core v1.5 uses a clean, deterministic hash computation:
 
 ```
-version + device_id + timestamp + readings + nonce
+hash_input =
+    header +
+    timestamp +
+    device_id +
+    ordered(fields) +
+    nonce (optional) +
+    shared_secret
 ```
 
-The final `hash` field is included after computation.
+Hash algorithm (recommended):  
+**BLAKE2s**, truncated to **4–8 bytes**.  
+SHA-256 truncated is also supported.
 
----
+**Important:**  
+Fields must be hashed in **sorted key order**:
 
-# 🔹 **3. Device Fingerprinting (Optional)**
-
-Devices may include:
-- MCU unique ID hash  
-- MAC address hash  
-- Serial number hash  
-
-These are hashed before inclusion to avoid leaking raw identifiers.
-
-This supports:
-- Authenticity  
-- Mapping devices to trust groups  
-- Cross-validation with IoTIVP-Binary device IDs  
-
----
-
-# 🔹 **4. Nonce & Replay Protection**
-
-The **nonce** is optional but recommended.
-
-Rules:
-- 1–4 bytes  
-- Monotonic counter or pseudo-random  
-- Receiver remembers last-seen nonces  
-- Reject on duplicates
-
-This protects:
-- Shared LoRa channels  
-- BLE broadcast environments  
-- Swarm robotics chatter  
-
----
-
-# 🔹 **5. Validation Flow (Core Layer)**
-
-Receiver performs:
-
-1. Validate JSON structure  
-2. Recompute field-level hash  
-3. Compare to `hash` field  
-4. Validate timestamp drift  
-5. Check nonce (if supplied)  
-6. Pass structured data to Binary encoder or analytics layer  
-
-If any step fails → **reject packet**.
-
----
-
-# 🔹 **6. Profiles (v1.5 feature)**
-
-IoTIVP-Core supports **profiles** for different application types:
-
-### ✔️ Environmental Sensors (Profile A)
-- temp  
-- hum  
-- pressure  
-- battery  
-
-### ✔️ Robotics Telemetry (Profile B)
-- motor RPM  
-- IMU  
-- pose  
-- battery/thermal  
-
-### ✔️ BLE Nearby Devices (Profile C)
-- proximity  
-- short sensor readings  
-- device state  
-
-Profiles define:
-- Required fields  
-- Acceptable ranges  
-- Field hashing order  
-- Validation rules  
-
----
-
-# 🔹 **7. Core → Binary Relationship**
-
-| Layer | Purpose |
-|--------|---------|
-| **Core (v1.5)** | Human-readable, explainable, profile-based integrity |
-| **Binary (v1.0)** | Compact, byte-level encoding for constrained networks |
-
-Core packets may be:
-
-- Used standalone  
-- Passed into IoTIVP-Binary encoders  
-- Validated at gateways before encoding  
-- Logged for debugging  
-- Stored for auditing  
-
-**Core gives meaning.**  
-**Binary gives efficiency.**
-
----
-
-# 🔹 **8. Example IoTIVP-Core Packet**
-
-```
+```json
 {
-  "version": "1.5",
-  "device_id": "DEV-A19F",
-  "timestamp": 1737591022,
-  "readings": {
-      "temp": 22.4,
-      "hum": 54.8,
-      "batt": 3.74
-  },
-  "nonce": 117,
-  "hash": "6ac4fa2e45f1478f"
+  "battery": 92,
+  "humidity": 60,
+  "temperature": 23.5
+}
+```
+
+This ensures cross-language determinism.
+
+---
+
+# 4. Integrity Score v2.0 (Verification Layer)
+
+IoTIVP-Core feeds directly into the IoTIVP Verify Engine.
+
+The Verify Engine generates a trust score from **0–100** across five dimensions:
+
+| Dimension | Weight | Description |
+|----------|--------|-------------|
+| **Hash Validity** | 40% | Was the hash correct? |
+| **Timestamp Validity** | 20% | Within allowed window? |
+| **Sequence / Nonce Behavior** | 15% | Replay or anomalies? |
+| **Signal/Value Anomalies** | 15% | Out-of-range or unrealistic values? |
+| **Device Behavior Profile** | 10% | Expected frequency, battery curves, etc. |
+
+Output example:
+
+```json
+{
+  "valid": true,
+  "integrity_score": 94,
+  "details": {
+    "hash_valid": true,
+    "timestamp_fresh": true,
+    "nonce_behavior": "clean",
+    "anomalies": []
+  }
 }
 ```
 
 ---
 
-# 🔹 **9. Roadmap**
+# 5. Mapping IoTIVP-Core ↔ IoTIVP-Binary
 
-### **v1.5 → v1.6**
-- Signed hashes (MAC mode)  
-- Device trust scoring  
-- Field-range anomaly detection  
+All IoTIVP-Core packets can be converted to IoTIVP-Binary v1.0 via TLV fields.
 
-### **v1.6 → v2.0**
-- Superposition Mode (IoTIVP-S)  
-- Dual-payload hashing  
-- Verified synthetic readings  
+### Example Mapping
+
+| Core JSON Field | TLV Type ID | TLV Value |
+|-----------------|-------------|-----------|
+| `temperature` | `0x01` | fixed-point int (x10) |
+| `humidity` | `0x02` | 1-byte uint |
+| `battery` | `0x03` | 1-byte uint |
+| `custom.*` | `0x10–0xFF` | variable |
+
+A gateway performs:
+
+- **Core → Binary**  
+- **Binary → Core**  
+
+using the same field catalog.
 
 ---
 
-# 🔹 **10. Repo Structure**
+# 6. IoTIVP-Core Field Catalog (v1.5)
 
+### Standard Environment Fields
+| Name | TLV ID | Type |
+|------|--------|------|
+| `temperature` | 0x01 | int16 (fixed point, x10) |
+| `humidity` | 0x02 | uint8 |
+| `battery` | 0x03 | uint8 |
+| `pressure` | 0x04 | 2–4 bytes |
+| `light` | 0x05 | uint16 |
+
+### Robotics / Motion Fields
+| Name | TLV ID | Type |
+|------|--------|------|
+| `accel_x` | 0x10 | int16 |
+| `accel_y` | 0x11 | int16 |
+| `accel_z` | 0x12 | int16 |
+| `gyro_x` | 0x13 | int16 |
+| `gyro_y` | 0x14 | int16 |
+| `gyro_z` | 0x15 | int16 |
+
+### Custom / Reserved
+- `0x80–0xFF` reserved for future modules.
+
+---
+
+# 7. Reference Hash Function (Python)
+
+Add this file:
+
+`iotivp_core_hash.py`
+
+```python
+import hashlib
+import json
+
+def compute_core_hash(packet: dict, secret: bytes, hash_len=4):
+    """
+    Compute IoTIVP-Core hash (v1.5).
+    Deterministic field ordering.
+    """
+    header = packet["header"]
+    timestamp = packet["timestamp"]
+    device_id = packet["device_id"]
+    nonce = packet.get("nonce")
+
+    fields = packet["fields"]
+    sorted_items = sorted(fields.items(), key=lambda x: x[0])
+
+    hash_input = (
+        str(header) +
+        str(timestamp) +
+        str(device_id)
+    )
+
+    for k, v in sorted_items:
+        hash_input += f"{k}:{v}"
+
+    if nonce is not None:
+        hash_input += str(nonce)
+
+    hash_input += secret.decode()
+
+    digest = hashlib.blake2s(hash_input.encode()).digest()
+    return digest[:hash_len].hex()
 ```
-docs/
-  specs/
-    v1.4/
-    v1.5/
-  diagrams/
-  reference/
-examples/
-tests/
+
+---
+
+# 8. Example IoTIVP-Core Packet (Sensor)
+
+```json
+{
+  "header": 1,
+  "timestamp": 1732212000,
+  "device_id": 42,
+  "nonce": 77,
+  "fields": {
+    "temperature": 23.5,
+    "humidity": 60,
+    "battery": 91
+  },
+  "hash": "baf24977"
+}
 ```
 
 ---
 
-# 🔹 PD2KC.ai Signature Line  
-**Assume nothing. Verify everything. Catch the corbeaux alive.**
+# 9. Example IoTIVP-Core Packet (Robotics)
+
+```json
+{
+  "header": 1,
+  "timestamp": 1732212022,
+  "device_id": 71,
+  "fields": {
+    "accel_x": 121,
+    "accel_y": -5,
+    "accel_z": 0,
+    "gyro_x": 3,
+    "gyro_y": -2,
+    "gyro_z": 1
+  },
+  "hash": "93aa21d7"
+}
+```
 
 ---
+
+# 10. Workflow Summary
+
+1. **Device** produces field values.  
+2. **Firmware** builds IoTIVP-Core JSON.  
+3. JSON is **hashed** using Core rules.  
+4. JSON is **encoded** into IoTIVP-Binary TLV.  
+5. Device transmits Binary.  
+6. **Gateway decodes** Binary → Core JSON.  
+7. **Verify Engine** calculates Integrity Score v2.0.  
+8. Clean data flows into **n8n**, analytics, ML, robotics.
+
+---
+
+# 11. Versioning
+
+- IoTIVP-Core v1.5 — current  
+- IoTIVP-Binary v1.0 — binary layer  
+- IoTIVP Verify Engine v1.5 — scoring layer  
+- IoTIVP Ecosystem v1 — combined suite  
+
+---
+
+IoTIVP-Core is now a **complete, ready-to-publish standard**  
+for IoT, robotics, and low-power networks.
