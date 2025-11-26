@@ -5,16 +5,15 @@
   <img src="https://img.shields.io/badge/Hash-Pipeline%201.5-yellow?style=for-the-badge"/>
 </p>
 
-# 🧠 IoTIVP-Core v1.5
-
+# 🧠 IoTIVP-Core v1.5  
 ### **Structured JSON + Deterministic Hashing**
 
-IoTIVP-Core is the **human-readable** form of sensor data in the IoTIVP ecosystem.  
-It acts as the bridge between raw binary packets and integrity verification.
+IoTIVP-Core translates raw IoTIVP-Binary packets into a standardized JSON format.  
+It defines the **trusted sensor packet schema** shared across the ecosystem.
 
 ---
 
-# 📄 Core JSON Structure
+# 🧩 Core JSON Structure
 
 ```json
 {
@@ -33,55 +32,52 @@ It acts as the bridge between raw binary packets and integrity verification.
 
 ---
 
-# 🔐 Hashing Pipeline (Deterministic)
-
-The hash input is:
+# 🔐 Deterministic Hashing Pipeline (v1.5)
 
 ```
-header + timestamp + device_id + sorted(fields) + nonce + secret
+hash_input =
+    header
+  + timestamp
+  + device_id
+  + sorted(fields)
+  + nonce
+  + secret
 ```
 
-Then hashed via:
-
-- `blake2s` (default)  
-- or `sha256`  
-
-Output is truncated to **4–8 bytes**, depending on the profile.
+Hash output: **4–8 bytes**, BLAKE2s recommended.
 
 ---
 
-# 🎯 What IoTIVP-Core Provides
-
-- ✔ Stable cross-system data format  
-- ✔ Source-ordered hashing (prevents manipulation)  
-- ✔ Works with gateways, cloud, robotics, n8n  
-- ✔ Maps directly from Binary → Core via TLV  
-
----
-
-# 🔧 Example: Compute Hash
+# 🔧 Python Example: Compute Hash
 
 ```python
 from iotivp_core_hash import compute_core_hash
 
-hash_hex = compute_core_hash(packet, secret=b"demo-secret", hash_len=4)
-print(hash_hex)
+hash_hex = compute_core_hash(
+    packet_json,
+    secret=b"demo-secret",
+    hash_len=4
+)
+
+print("hash:", hash_hex)
 ```
 
 ---
 
-# 📚 Core Concepts
-
-- **fields{}** — arbitrary sensor or robotics data  
-- **nonce** — replay protection  
-- **hash** — integrity + tamper detection  
-- **device_id** — unsigned, consistent identity  
+# 📘 Features  
+- ✔ Stable cross-system JSON representation  
+- ✔ Deterministic hashing  
+- ✔ TLV → field mapping rules  
+- ✔ Ideal for cloud, dashboards, robotics  
 
 ---
 
-# 🔐 Why IoTIVP-Core?
+# 🧱 Ideal For  
+- AI/ML robotics decision loops  
+- Cloud aggregators (AWS/GCP/CF Workers)  
+- Sensor dashboards  
+- n8n automations  
 
-It creates a **stable, trusted, predictable** data structure that all downstream systems can rely on.
+---
 
-IoTIVP-Core is the **source of truth** before verification.
-
+**IoTIVP-Core is the “source of truth” before verification.**
