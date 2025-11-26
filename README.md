@@ -1,4 +1,12 @@
-# 🧠 IoTIVP-Core v1.5  
+<p align="center">
+  <img src="https://img.shields.io/badge/Protocol-IoTIVP%20Core-blue?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Status-Stable-green?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Model-JSON%20Schema-lightgrey?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Hash-Pipeline%201.5-yellow?style=for-the-badge"/>
+</p>
+
+# 🧠 IoTIVP-Core v1.5
+
 ### **Structured JSON + Deterministic Hashing**
 
 IoTIVP-Core is the **human-readable** form of sensor data in the IoTIVP ecosystem.  
