@@ -1,109 +1,64 @@
 # Contributing to IoTIVP
 
-Thank you for your interest in contributing to the **IoT Integrity Verification Protocol (IoTIVP)**.  
-This is an open protocol effort under **PD2KC.ai — IoTIVP Protocol Team**.
-
-We welcome:
-
-- Bug reports  
-- Security concerns  
-- Profile proposals  
-- New examples  
-- Implementations (Python, C, Rust, embedded, etc.)  
-- Documentation improvements  
-- Research and whitepapers  
+Thank you for your interest in helping build the IoT Integrity Verification Protocol!  
+IoTIVP is an early-stage but growing open standard focused on secure, trustworthy IoT data.
 
 ---
 
-# 🔹 1. Code of Conduct
+## 🧭 How to Contribute
 
-All contributors must follow respectful, professional communication.  
-No harassment, aggression, or disrespectful behavior.
+### 1. Open an Issue
+Use GitHub Issues to:
+- Report bugs  
+- Suggest improvements  
+- Request features  
+- Ask questions about implementation
 
----
+### 2. Pull Requests (PRs)
+Before opening a PR:
+- Open an issue describing the change  
+- Keep PRs small and focused  
+- Follow the repository’s style and folder structure  
 
-# 🔹 2. How to Contribute
-
-### 2.1. Reporting Issues
-Open an issue in GitHub with:
-
-- Clear description  
-- Affected version (Core or Binary)  
-- Reproduction steps  
-- Expected vs actual behavior  
-
-### 2.2. Adding Profiles
-Submit a PR with:
-
-- Profile name  
-- Required readings  
-- Optional readings  
-- Validation rules  
-- Hashing rules (if custom)  
-- Examples  
-
-### 2.3. Submitting Implementations
-You may contribute:
-
-- Parsers  
-- Encoders  
-- Decoders  
-- Hash utilities  
-- Test vectors  
-
-Recommended languages:
-
-- Python  
-- C / C++  
-- Rust  
-- Go  
-- TypeScript  
-- Embedded C (ESP32, STM32, AVR)  
+### 3. Discussions
+If the org eventually enables GitHub Discussions, it will be used for:
+- Architecture questions  
+- Protocol debates  
+- Help with implementation  
+- Integration examples
 
 ---
 
-# 🔹 3. Specification Contributions
+## 🏗 Code Style
 
-Specs live under:
-
-```
-docs/specs/v1.x/
-```
-
-Changes to specs require:
-
-- Clear explanation  
-- Version bump (MAJOR/MINOR/PATCH)  
-- Updated CHANGELOG.md  
-- Test vectors where applicable  
+### Python
+- Use clear, readable code  
+- No unnecessary complexity  
+- Add docstrings  
+- Keep functions pure when possible  
 
 ---
 
-# 🔹 4. Security Reporting
-
-If you find a vulnerability, please open a **private GitHub security advisory**, not a public issue.
-
-We will review and coordinate disclosure.
-
----
-
-# 🔹 5. Style Guidelines
-
-### For Core (JSON):
-- Use lowercase field names  
-- Use consistent numeric formatting  
-- Deterministic key ordering in examples  
-
-### For Binary:
-- Use uppercase hex (A–F)  
-- Group bytes visually for readability  
-- Annotate sample packets  
+## 🧪 Testing
+If adding new components:
+- Include small, self-contained test scripts  
+- Ensure decoding/encoding logic remains deterministic  
+- Do not introduce breaking changes without discussion
 
 ---
 
-# 🔹 6. License  
-Contributions are accepted under the **MIT License**.
+## 🔐 Security Notes
+IoTIVP deals with cryptographic integrity.  
+Do **not** commit:
+- secrets  
+- private keys  
+- device-specific credentials  
+- sensitive environment variables
+
+If you find a security issue, contact maintainers privately.
 
 ---
 
-**PD2KC.ai — Catch the corbeaux alive.**  
+## ❤️ Thank You
+Even early suggestions help shape IoTIVP into a global standard.  
+Your feedback is welcome and valued.
